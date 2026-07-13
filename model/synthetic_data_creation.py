@@ -358,7 +358,7 @@ def construct_class_b(N: int, P_0: float, distance_magnitude: float,
 ##################################################
 
 #### Dataset creation of the two elements
-def create_dataset(num_nodes: int = 10, num_per_set: int = 100, p_0: float = 0.0, dist: float = 5.0,
+def create_dataset(num_nodes: int = 10, dataset_size: int = 200, p_0: float = 0.0, dist: float = 5.0,
                    allow_red_start: bool = True, starting_point: tuple = (0,0,0,1),
                    seed: int = 0, allow_repeat: bool = True,
                    max_radius: float = 0, change_polarity: bool = False) -> list[tuple[dict[int, tuple[float, float, float, float]], int]]:
@@ -368,6 +368,8 @@ def create_dataset(num_nodes: int = 10, num_per_set: int = 100, p_0: float = 0.0
     if seed != 0:
         random.seed(seed)
 
+
+    num_per_set = int(dataset_size/2)
 
     #Now create the dataset
     graphs_dataset = []

@@ -23,7 +23,7 @@ class QuantumGraph():
 
     def __init__(self, time: list[float] | float, delta_t: float,
                   quantum_evolution_time: list[int],
-                  recenter: bool, device_type: str,
+                  recenter: bool, quantum_device_type: str,
                   legacy_features_init_type: str,
                   one_graph_window: bool = False, dimensions: int = 2,
                   normalise_xy: bool = False,
@@ -41,7 +41,7 @@ class QuantumGraph():
         self.delta_t = delta_t
         self.q_evol_time = quantum_evolution_time
         self.recenter = recenter
-        self.device_type = device_type
+        self.device_type = quantum_device_type
         self.legacy_features_init_type = legacy_features_init_type
 
         self.one_graph_window = one_graph_window
@@ -119,8 +119,6 @@ class QuantumGraph():
             #Compute the graph features for this step
             subgraph_node_features, subgraph_final_features = self.get_node_features_quantum_layer(subgraph_in_time_window, subgraph_features)
 
-            print(f"Executed run for time step {t}")
-
             ##Add the new features to the graph/update the existing features
             node_features.append(subgraph_node_features)
 
@@ -165,7 +163,6 @@ class QuantumGraph():
 
         if self.subsample_spike_per_pixel:
             subgraph_features_list = tools.expand_spike_per_pixel(subgraph_in_time_window, subgraph_features_list, coordinates_events)
-        print(f"Executed run for time step {self.time}")
 
 
         return subgraph_features_histogram, subgraph_features_list

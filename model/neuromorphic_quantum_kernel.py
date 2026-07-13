@@ -27,7 +27,7 @@ def obtain_dataset_neuromorphic_gnn_features_sequential(graphs_dataset: list[lis
     graph_qtime_features = [] #This is only necessary if one_window = True
 
     qgraph = QuantumGraph(time=time, delta_t=delta_t, quantum_evolution_time=quantum_evolution_time,
-                          recenter=recenter, device_type=device_type, legacy_features_init_type=legacy_features_init_type, one_graph_window=one_window)
+                          recenter=recenter, quantum_device_type=device_type, legacy_features_init_type=legacy_features_init_type, one_graph_window=one_window)
 
     for i, (graph_coords, label) in enumerate(graphs_dataset):
 
@@ -65,7 +65,7 @@ def obtain_dataset_neuromorphic_gnn_features_sequential(graphs_dataset: list[lis
 def obtain_dataset_neuromorphic_gnn_features_sequential_one_window(graphs_dataset: list[list[tuple[float,float,float]]], time: float, delta_t: float,
                                                                    final_layer_dict: list[dict[int,np.float64]],
                                                                    quantum_evolution_time: list[int],
-                                                                   recenter: bool, device_type: str,
+                                                                   recenter: bool, quantum_device_type: str,
                                                                    legacy_features_init_type: str,
                                                                    dimensions: int, normalise_xy: bool,
                                                                    subsample_spike_per_pixel: bool,
@@ -90,7 +90,7 @@ def obtain_dataset_neuromorphic_gnn_features_sequential_one_window(graphs_datase
         max_num_events_per_t = max(max_num_events_per_t, max_train_event)
 
     qgraph = QuantumGraph(time=time, delta_t=delta_t, quantum_evolution_time=quantum_evolution_time,
-                          recenter=recenter, device_type=device_type, legacy_features_init_type=legacy_features_init_type,
+                          recenter=recenter, quantum_device_type=quantum_device_type, legacy_features_init_type=legacy_features_init_type,
                           one_graph_window=True, dimensions=dimensions,
                           normalise_xy=normalise_xy, max_num_events=max_num_events_per_t,
                           subsample_spike_per_pixel=subsample_spike_per_pixel,
@@ -166,7 +166,7 @@ def execute_kernel_run_v2(graph_dataset: list[list[tuple[float,float,float]]],
                           time_steps: list[float], delta_t: float,
                           kernel_function, error_func,
                           q_evolution_min_t: int, q_evolution_max_t: int, q_evolution_delta_t: int,
-                          recenter: bool = True, device_type: str = 'analog',
+                          recenter: bool = True, quantum_device_type: str = 'analog',
                           legacy_features_init_type: str = 'default',
                           dimensions: int = 2, normalise_xy: bool = False,
                           subsample_spike_per_pixel: bool = False,
@@ -199,7 +199,7 @@ def execute_kernel_run_v2(graph_dataset: list[list[tuple[float,float,float]]],
     labels_test = []
 
     #Create the time range of quantum evolution. (Increasing order)
-    quantum_evolution_time_list = list(range(q_evolution_min_t, q_evolution_max_t, q_evolution_delta_t))
+    quantum_evolution_time_list = list(range(q_evolution_min_t, q_evolution_max_t + 1, q_evolution_delta_t))
 
     #Initialise the dictionaries of features in the optimal run
     optimal_run_feature_list_of_dict = [{} for _ in range(len(graph_dataset))]
@@ -214,7 +214,7 @@ def execute_kernel_run_v2(graph_dataset: list[list[tuple[float,float,float]]],
         state_vec_dataset, label_dataset, graph_all_qtime_features, max_events = obtain_dataset_neuromorphic_gnn_features_sequential_one_window(graph_dataset, t, delta_t,
                                                                                                                                 optimal_run_feature_list_of_dict,
                                                                                                                                 quantum_evolution_time_list, recenter,
-                                                                                                                                device_type, legacy_features_init_type,
+                                                                                                                                quantum_device_type, legacy_features_init_type,
                                                                                                                                 dimensions, normalise_xy, subsample_spike_per_pixel,
                                                                                                                                 linear_multiplicative_time_c=linear_multiplicative_time_c,
                                                                                                                                 split_time_in_middle=split_time_in_middle,

@@ -606,7 +606,6 @@ def sample_single_distribution_v3(graph: dict[int, tuple[float, float]] | dict[i
 
     #Remove points that are outside of the region
     graph_size = len(graph_coordinates)
-    print(f"Number of qubits: {graph_size}")
 
     #If we use the emulator, check what type of emulator we need
     emu_sv = None
@@ -637,6 +636,7 @@ def sample_single_distribution_v3(graph: dict[int, tuple[float, float]] | dict[i
 
 
     t_max = max(t_list)
+
     #Create the register
     reg = None
     if dimensions == 2:
@@ -664,7 +664,6 @@ def sample_single_distribution_v3(graph: dict[int, tuple[float, float]] | dict[i
     seq.declare_channel("rydberg_global","rydberg_global")
 
     #Create and add the pulse
-    print(f"t_max: {t_max}")
     constant_pulse = pulser.Pulse.ConstantPulse(
         t_max,
         rabi_freq,
@@ -706,16 +705,9 @@ def sample_single_distribution_v3(graph: dict[int, tuple[float, float]] | dict[i
     else:
         backend, bitstrings = pulser_setup_v2(seq, t_list, node_features, num_of_samples, allow_noise=allow_noise, noise_model_params=noise_model_params)
 
-    start_test_time = time.time()
-
     result = backend.run()
 
-    end_test_time = time.time()
-
-    print(f"It takes {end_test_time - start_test_time} seconds for running the simulator for {graph_size} qubits")
-
     #Compute the runs from the system
-    start_test_time = time.time()
     p_dists = []
     most_likely_states = []
     for i, t in enumerate(t_list):
@@ -727,8 +719,6 @@ def sample_single_distribution_v3(graph: dict[int, tuple[float, float]] | dict[i
         else:
             time_to_check = result.get_result_times(bitstrings)[i]
             result_distribution = result.get_result(bitstrings,time_to_check)
-            #current_state = result.state[i]
-            #result_distribution = current_state.sample(num_shots=num_of_samples)
 
         #Compute the \sum_i n_i
         p_distribution = sample_single_run_num_excited_qubits(result_distribution, num_of_samples, graph_num_vertex)
@@ -758,14 +748,6 @@ def sample_single_distribution_v3(graph: dict[int, tuple[float, float]] | dict[i
         p_dists.append(p_distribution)
 
 
-
-
-
-    end_test_time = time.time()
-
-    print(f"It takes {end_test_time - start_test_time} seconds for getting the result for {graph_size} qubits")
-
-
     if initial_features:
         return p_dists, most_likely_states
     return p_dists
@@ -775,9 +757,6 @@ def sample_single_distribution_v3(graph: dict[int, tuple[float, float]] | dict[i
 
 #Method to compute the existing graphs
 #Return: An array containing the dynamics of the distribution
-
-
-
 def create_graph_distributions(graph_labels_list: list[dict[str,tuple]], dev,
                                t: Union[int, list[int]], rabi_freq: float = 2*np.pi, detuning_freq: float = 2*np.pi*0.7, phase: float = 0.0,
                                num_of_samples = 10000):
