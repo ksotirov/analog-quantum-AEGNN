@@ -94,9 +94,7 @@ def get_noise_model(noise_model_params) -> NoiseModel:
     noise_model = None
 
     if noise_model_params is None:
-        noise_model = NoiseModel(dephasing_rate=0.008*2*np.pi, relaxation_rate=0.0025*2*np.pi)
-        #noise_model = NoiseModel(p_false_neg=0.05,p_false_pos=0.05)
-
+        raise Exception("Noise parameters should be specified via a JSON string")
     else:
         noise_model = pulser.NoiseModel.from_abstract_repr(noise_model_params)
 
@@ -255,7 +253,6 @@ def mps_setup(sequence: pulser.Sequence, t_list: list[int], node_features: list[
             precision=1e-5,
             solver=Solver.TDVP,
             interaction_cutoff=1e-6,
-            #max_bond_dim=20
             )
 
     backend = emu_mps.MPSBackend(sequence, config=mpsconfig)
@@ -313,9 +310,6 @@ def remove_pixels_given_criteria(graph_coordinates: np.ndarray[np.ndarray],
                     events_to_delete.append(event_to_be_removed) #Add this to the list that stores deleted events
 
     new_graph_coordinates = graph_coordinates[~np.all(graph_coordinates == np.inf, axis=1)]
-
-    #for event in events_to_delete:
-    #    events_to_delete_info_dict[event] #Note: this does not seem to do anything useful
 
     return new_graph_coordinates, initial_features, deleted_by_dict
 

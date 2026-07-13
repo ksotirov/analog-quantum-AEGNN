@@ -3,6 +3,7 @@ import random
 import csv
 import argparse
 import json
+from pathlib import Path
 
 from model import evalutaion_funcs as ef
 from model import neuromorphic_quantum_kernel as nqkrn
@@ -20,7 +21,7 @@ def parse_args():
     parser.add_argument("--w_weight", type=float, default=0.1, help="The weight to deviate from the graph set")
 
     ### Model parameters
-    parser.add_argument("--window_size", type=int, default=10, help="The window frame size")
+    parser.add_argument("--window_size", type=int, default=10, help="The size of the window time frame")
     parser.add_argument("--min_q_time", type=int, default=50, help="Minimum quantum time evolution")
     parser.add_argument("--max_q_time", type=int, default=2000, help="Maximum quantum time evolution")
     parser.add_argument("--q_delta_t", type=int, default=50, help="Quantum time evolution difference")
@@ -31,10 +32,10 @@ def parse_args():
     parser.add_argument("--num_runs", type=int, default=1, help="The number of different experiment executions")
 
     ### Include noise
-    parser.add_argument("--noise_type", type=str, default='None', help="Specify the noise type")
+    parser.add_argument("--allow_noise", type=bool, default=False, help="Specify whether the execution should contain noise or not")
 
     ### Misc
-    parser.add_argument("--csvnum", type=int, help="Gets the csv file number")
+    parser.add_argument("--run_number", type=int, help="Get the execution number")
     parser.add_argument("--seed", type=int, default=881, help="Set the seed number")
     parser.add_argument("--save_q_str", type=bool, default=False, help="Record and save accuracy against time evolution")
 
@@ -52,8 +53,8 @@ def main():
     random.seed(seed_number)
 
     offset = 0
-    if args.csvnum:
-        offset = args.csvnum
+    if args.run_number:
+        offset = args.run_number
 
     #Define the parameters for the dataset
     num_nodes = args.graph_size
@@ -85,19 +86,12 @@ def main():
             raise Exception("Other type of feature encoding are not supported.")
 
     #Specify a noise model
-    noise_type = args.noise_type
+    allow_noise = args.allow_noise
 
     noise_model = None
-    allow_noise = None
-    match noise_type.lower():
-        case 'spam':
-            allow_noise = True
-        case 'quantum':
-            allow_noise = True
-            with open("noise_models/noise_model.json", "r") as json_file:
-                noise_model = json.load(json_file)
-        case _:
-            allow_noise = False
+    if allow_noise:
+        with open("noise_models/noise_model.json", "r") as json_file:
+            noise_model = json.load(json_file)
 
 
     #Specify the kernel and the score function
@@ -173,6 +167,9 @@ def main():
         row_info = [i+1, *test_scores_per_num_nodes]
         data_to_save.append(row_info)
 
+
+    #Save the file
+    Path("results").mkdir(parents=True, exist_ok=True)
     with open('results/neuromorphic_qaaegnn_' + run_number + '.csv', 'w', newline='') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerows(data_to_save)
